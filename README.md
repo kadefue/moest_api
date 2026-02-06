@@ -1,40 +1,15 @@
-# Moest API
+# BEST Dataset Formatting and Usage
 
-## Overview
-This repository contains the Moest API, which provides a set of functionalities for managing data efficiently.
+This section describes the formatting and usage of the BEST dataset.
 
-## Features
-- Detailed functionalities of the API.
-- Easy to integrate with various front-end technologies.
-
-## Installation
-To set up the Moest API, ensure you have Docker installed on your machine.
-
-### Using Docker
-1. **Clone the Repository**  
-   Clone the repository to your local machine:
-   ```bash
-   git clone https://github.com/kadefue/moest_api.git
-   cd moest_api
-   ```
-2. **Build the Docker Image**  
-   Run the following command to build the Docker image:
-   ```bash
-   docker build -t moest_api .
-   ```
-3. **Run the Docker Container**  
-   Start a container instance of the API:
-   ```bash
-   docker run -p 8080:8080 moest_api
-   ```
-4. **Access the API**  
-   Open your browser and navigate to `http://localhost:8080` to access the API.
+## Formatting
+- Each entry in the dataset should follow a consistent structure with the following fields:
+  - Field 1: Description
+  - Field 2: Description
 
 ## Usage
-After setting up the API, you can make requests to it using your preferred tool (e.g., Postman, curl).
+- To utilize the dataset, follow these steps:
+  1. Step 1: Description
+  2. Step 2: Description
 
-## Contributing
-Feel free to submit issues or pull requests to improve the documentation or functionalities.
-
-## License
-This project is licensed under the MIT License.
+Ensure that you validate the data before processing it.
