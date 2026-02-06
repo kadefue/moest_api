@@ -1,6 +1,7 @@
 # --- Data and Large Files ---
 # Excludes the entire data directory containing CSVs
 data/
+!data/csvs/.gitkeep
 # Excludes any CSV files if they happen to be in the root
 *.csv
 *.xls
