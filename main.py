@@ -2,12 +2,11 @@ from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 import database as db
-from model_logic import Pipeline # Your script wrapped in a class
+from model_logic import Pipeline
 import uvicorn
 
-app = FastAPI(title="MoEST Enrollment Forecast API")
+app = FastAPI()
 
-# Dependency
 def get_db():
     session = db.SessionLocal()
     try:
@@ -20,50 +19,47 @@ def startup():
     db.init_db()
 
 @app.post("/run-forecast")
-def trigger_forecast(db_session: Session = Depends(get_db)):
-    # 1. Determine next Batch ID
-    last_batch = db_session.query(func.max(db.ForecastResult.batch_id)).scalar()
-    current_batch = (last_batch or 0) + 1
+def run_model_batch(db_session: Session = Depends(get_db)):
+    # Increment Batch ID
+    max_batch = db_session.query(func.max(db.ForecastRecord.batch_id)).scalar() or 0
+    new_batch = max_batch + 1
     
-    # 2. Run the Pipeline
+    # Run ML Pipeline
     pipeline = Pipeline()
-    # Modify your run() method to return the final_df instead of just saving CSV
-    df_results = pipeline.run() 
+    df_results = pipeline.run()
     
-    # 3. Store to MySQL
-    records = []
-    for _, row in df_results.iterrows():
-        record = db.ForecastResult(
-            batch_id=current_batch,
-            year=int(row['YEAR']),
-            region=row['REGION'],
-            council=row['COUNCIL'],
-            form_num=int(row['FORM_NUM']),
-            subject=row['SUBJECT'],
-            enrollment_govt=int(row['ENROLLMENT_Government']),
-            enrollment_all=int(row['ENROLLMENT_All'])
-        )
-        records.append(record)
-    
-    db_session.bulk_save_objects(records)
-    db_session.commit()
-    
-    return {"message": "Forecast completed", "batch_id": current_batch, "records_added": len(records)}
+    if df_results is not None:
+        # Save to MySQL
+        records = [
+            db.ForecastRecord(
+                batch_id=new_batch,
+                year=int(r['YEAR']),
+                region=r['REGION'],
+                council=r['COUNCIL'],
+                subject=r['SUBJECT'],
+                form_num=int(r['FORM_NUM']),
+                enrollment_govt=int(r['ENROLLMENT_Government']),
+                enrollment_all=int(r['ENROLLMENT_All'])
+            ) for _, r in df_results.iterrows()
+        ]
+        db_session.bulk_save_objects(records)
+        db_session.commit()
+        return {"status": "success", "batch": new_batch, "rows": len(records)}
+    return {"status": "failed"}
 
-@app.get("/data")
-def get_data(
+@app.get("/forecasts")
+def get_forecasts(
     region: str = None, 
     council: str = None, 
     year: int = None, 
     subject: str = None,
     db_session: Session = Depends(get_db)
 ):
-    query = db_session.query(db.ForecastResult)
-    if region: query = query.filter(db.ForecastResult.region == region.upper())
-    if council: query = query.filter(db.ForecastResult.council == council.upper())
-    if year: query = query.filter(db.ForecastResult.year == year)
-    if subject: query = query.filter(db.ForecastResult.subject == subject.upper())
-    
+    query = db_session.query(db.ForecastRecord)
+    if region: query = query.filter(db.ForecastRecord.region == region.upper())
+    if council: query = query.filter(db.ForecastRecord.council == council.upper())
+    if year: query = query.filter(db.ForecastRecord.year == year)
+    if subject: query = query.filter(db.ForecastRecord.subject == subject.upper())
     return query.all()
 
 if __name__ == "__main__":

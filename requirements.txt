@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+cryptography

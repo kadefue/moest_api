@@ -9,15 +9,15 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-class ForecastResult(Base):
-    __tablename__ = "forecast_results"
+class ForecastRecord(Base):
+    __tablename__ = "forecasts"
     id = Column(Integer, primary_key=True, index=True)
-    batch_id = Column(Integer)  # Incremented per run
+    batch_id = Column(Integer)
     year = Column(Integer)
     region = Column(String(100))
     council = Column(String(100))
-    form_num = Column(Integer)
     subject = Column(String(100))
+    form_num = Column(Integer)
     enrollment_govt = Column(Integer)
     enrollment_all = Column(Integer)
 
